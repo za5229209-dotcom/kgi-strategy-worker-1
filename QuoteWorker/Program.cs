@@ -46,7 +46,7 @@ namespace QuoteWorker
 
         // 目前唯一確定的硬性門檻:當日累積成交量 < 500 張(=500,000 股)排除。
         // 其餘篩選規則(量能突破/均線/K棒型態...)等團隊討論定案後再加進 ScreenCandidates()。
-        const long MIN_TOTAL_VOLUME_SHARES = 500 * 1000;
+        const decimal MIN_TOTAL_VOLUME_SHARES = 500 * 1000;
 
         static QuoteCom quoteCom;
         static HttpClient http = new HttpClient();
@@ -61,7 +61,7 @@ namespace QuoteWorker
             public decimal LastPrice;
             public decimal DayHigh;
             public decimal DayLow;
-            public long TotalVolumeShares;
+            public decimal TotalVolumeShares;
             public DateTime LastUpdate;
             public List<decimal> RecentPrices = new List<decimal>(); // 供之後疊 K 線/判斷趨勢用
         }
@@ -183,7 +183,7 @@ namespace QuoteWorker
             }
         }
 
-        static void UpdateState(string stockNo, decimal price, decimal high, decimal low, long totalQty)
+        static void UpdateState(string stockNo, decimal price, decimal high, decimal low, decimal totalQty)
         {
             SymbolState st;
             if (!states.TryGetValue(stockNo, out st))
