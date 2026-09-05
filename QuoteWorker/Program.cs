@@ -31,7 +31,7 @@ namespace QuoteWorker
     {
         // ---- 從 GitHub Actions 的 Secrets 帶進來的環境變數 ----
         static string QuoteHost = Environment.GetEnvironmentVariable("QUOTE_HOST");
-        static ushort QuotePort = ushort.Parse(Environment.GetEnvironmentVariable("QUOTE_PORT") ?? "8000");
+        static ushort QuotePort = ParsePort(Environment.GetEnvironmentVariable("QUOTE_PORT"));
         static string SourceId = Environment.GetEnvironmentVariable("QUOTE_SOURCE_ID");
         static string Token = Environment.GetEnvironmentVariable("QUOTE_TOKEN");
         static string LoginId = Environment.GetEnvironmentVariable("KGI_LOGIN_ID");
@@ -64,6 +64,21 @@ namespace QuoteWorker
             public decimal TotalVolumeShares;
             public DateTime LastUpdate;
             public List<decimal> RecentPrices = new List<decimal>(); // 供之後疊 K 線/判斷趨勢用
+        }
+
+        // QUOTE_PORT 這個 Secret 沒設定、是空字串、或打錯格式(多空白/非數字)時,
+        // 不要讓整支程式直接崩潰,改成安全地退回預設值 8000,並印出警告方便排查。
+        static ushort ParsePort(string raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw))
+            {
+                Console.WriteLine("[WARN] 沒有設定 QUOTE_PORT,使用預設值 8000。");
+                return 8000;
+            }
+            ushort result;
+            if (ushort.TryParse(raw.Trim(), out result)) return result;
+            Console.WriteLine("[WARN] QUOTE_PORT 的值 \"" + raw + "\" 不是有效的數字,使用預設值 8000。");
+            return 8000;
         }
 
         static void Main(string[] args)
